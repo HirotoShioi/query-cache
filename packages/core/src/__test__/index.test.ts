@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { cache } from '..';
+import { query } from '..';
 import type { QueryKey, NonEmptyArray } from '../types';
 import * as fc from 'fast-check';
 
@@ -13,7 +13,7 @@ const createCounterQuery = (
 ) => {
   let count = 0;
   return () =>
-    cache.query<number>({
+    query.cache<number>({
       queryKey,
       queryFn: async () => {
         count++;
@@ -28,7 +28,7 @@ const createSimpleQuery = <T = number>(
   returnValue: T = 1 as T
 ) => {
   return () =>
-    cache.query<T>({
+    query.cache<T>({
       queryKey,
       queryFn: async () => returnValue,
     });
@@ -36,75 +36,75 @@ const createSimpleQuery = <T = number>(
 
 describe.sequential('Query - Browser Environment', () => {
   beforeEach(() => {
-    cache.clear({ resetOptions: true });
+    query.clear({ resetOptions: true });
   });
 
   it('should work in browser environment', async () => {
-    const query = createSimpleQuery(['test']);
-    const result = await query();
+    const simpleQuery = createSimpleQuery(['test']);
+    const result = await simpleQuery();
     expect(result).toEqual(1);
-    expect(cache.size).toBe(1);
-    cache.clear();
-    expect(cache.size).toBe(0);
+    expect(query.size).toBe(1);
+    query.clear();
+    expect(query.size).toBe(0);
   });
 
   it('should return same result when called with same key', async () => {
-    const query = createCounterQuery(['test']);
-    const result = await query();
+    const counterQuery = createCounterQuery(['test']);
+    const result = await counterQuery();
     expect(result).toEqual(1);
-    const result2 = await query();
+    const result2 = await counterQuery();
     expect(result2).toEqual(1);
   });
 
   it('should invalidate cache', async () => {
-    const query = createCounterQuery(['invalidate-test']);
-    const firstResult = await query();
+    const counterQuery = createCounterQuery(['invalidate-test']);
+    const firstResult = await counterQuery();
     expect(firstResult).toEqual(1);
-    await cache.invalidate({
+    await query.invalidateCache({
       queryKey: ['invalidate-test'],
     });
-    expect(await query()).toEqual(2);
+    expect(await counterQuery()).toEqual(2);
   });
 
   it('should invalidate cache with refetch', async () => {
-    const query = createCounterQuery(['invalidate-test']);
-    const firstResult = await query();
+    const counterQuery = createCounterQuery(['invalidate-test']);
+    const firstResult = await counterQuery();
     expect(firstResult).toEqual(1);
-    await cache.invalidate({
+    await query.invalidateCache({
       queryKey: ['invalidate-test'],
       refetch: true,
     });
-    expect(await query()).toEqual(2);
+    expect(await counterQuery()).toEqual(2);
   });
 
   it('should not refetch when refetch is false', async () => {
-    const query = createCounterQuery(['no-refetch-test']);
-    const result = await query();
+    const counterQuery = createCounterQuery(['no-refetch-test']);
+    const result = await counterQuery();
     expect(result).toEqual(1);
-    await cache.invalidate({
+    await query.invalidateCache({
       queryKey: ['no-refetch-test'],
       refetch: false,
     });
-    expect(await query()).toEqual(2);
+    expect(await counterQuery()).toEqual(2);
   });
 
   it('should refetch when called after invalidateQueries', async () => {
-    const query = createCounterQuery(['no-refetch-test']);
-    await query();
-    await cache.invalidate({
+    const counterQuery = createCounterQuery(['no-refetch-test']);
+    await counterQuery();
+    await query.invalidateCache({
       queryKey: ['no-refetch-test'],
       refetch: false,
     });
-    expect(await query()).toEqual(2);
+    expect(await counterQuery()).toEqual(2);
   });
 
   it('should clear cache', async () => {
-    const query = createSimpleQuery(['clear-test'], {
+    const simpleQuery = createSimpleQuery(['clear-test'], {
       data: 'clear test data',
     });
-    await query();
-    cache.clear();
-    expect(cache.size).toBe(0);
+    await simpleQuery();
+    query.clear();
+    expect(query.size).toBe(0);
   });
 
   it('should invalidate cache with multiple keys', async () => {
@@ -114,7 +114,7 @@ describe.sequential('Query - Browser Environment', () => {
     await query1();
     await query2();
 
-    await cache.invalidate({
+    await query.invalidateCache({
       queryKey: ['invalidate-multiple-test'],
     });
 
@@ -141,7 +141,7 @@ describe.sequential('Query - Browser Environment', () => {
     await q1();
     await q2();
 
-    await cache.invalidate();
+    await query.invalidateCache();
 
     expect(await q1()).toBe(2);
     expect(await q2()).toBe(2);
@@ -156,7 +156,7 @@ describe.sequential('Query - Browser Environment', () => {
     await query2();
     await query3();
 
-    await cache.invalidate({
+    await query.invalidateCache({
       queryKey: ['users', 'list'],
     });
 
@@ -164,7 +164,7 @@ describe.sequential('Query - Browser Environment', () => {
     expect(await query2()).toBe(2);
     expect(await query3()).toBe(1);
 
-    await cache.invalidate({
+    await query.invalidateCache({
       queryKey: ['list', 'users'],
     });
 
@@ -177,7 +177,7 @@ describe.sequential('Query - Browser Environment', () => {
     const query2 = createCounterQuery(['users', 'list', 'active']);
     await query1();
     await query2();
-    await cache.invalidate({
+    await query.invalidateCache({
       queryKey: ['users', 'list'],
       exact: true,
     });
@@ -200,7 +200,7 @@ describe.sequential('Query - Browser Environment', () => {
     expect(await query()).toBe(2);
   });
   it('should delete least recently used queries when cache is full', async () => {
-    cache.setOptions({
+    query.setOptions({
       maxSize: 2,
     });
     const query1 = createCounterQuery(['lru-test'], 100);
@@ -209,63 +209,63 @@ describe.sequential('Query - Browser Environment', () => {
     await query2();
     const query3 = createCounterQuery(['lru-test', 'key3'], 100);
     await query3();
-    expect(cache.size).toBe(2);
+    expect(query.size).toBe(2);
   });
   it('should not cache when cache is set to 0', async () => {
-    cache.setOptions({
+    query.setOptions({
       maxSize: 0,
     });
-    const query = createCounterQuery(['no-cache-test']);
-    await query();
-    expect(cache.size).toBe(0);
+    const counterQuery = createCounterQuery(['no-cache-test']);
+    await counterQuery();
+    expect(query.size).toBe(0);
   });
   it('should ignore when the options are invalid', async () => {
-    cache.setOptions({
+    query.setOptions({
       maxSize: -1,
       staleTime: -1,
     });
-    expect(cache.size).toBe(0);
-    const query = createCounterQuery(['invalid-options-test']);
-    await query();
-    expect(cache.size).toBe(1);
+    expect(query.size).toBe(0);
+    const counterQuery = createCounterQuery(['invalid-options-test']);
+    await counterQuery();
+    expect(query.size).toBe(1);
   });
   it('cache even if the queryFn returns falsy values', async () => {
     let falsyCount = 0;
-    const query = () =>
-      cache.query({
+    const falsyQuery = () =>
+      query.cache({
         queryKey: ['falsy-test'],
         queryFn: async () => {
           falsyCount++;
           return false;
         },
       });
-    await query();
-    expect(cache.size).toBe(1);
+    await falsyQuery();
+    expect(query.size).toBe(1);
     expect(falsyCount).toBe(1);
-    await query();
+    await falsyQuery();
     expect(falsyCount).toBe(1);
     let undefinedCount = 0;
-    const query2 = () =>
-      cache.query({
+    const undefinedQuery = () =>
+      query.cache({
         queryKey: ['undefined-test'],
         queryFn: async () => {
           undefinedCount++;
           return undefined;
         },
       });
-    await query2();
-    expect(cache.size).toBe(2);
+    await undefinedQuery();
+    expect(query.size).toBe(2);
     expect(undefinedCount).toBe(1);
-    await query2();
+    await undefinedQuery();
     expect(undefinedCount).toBe(1);
   });
   it('should work with empty string queryKey', async () => {
-    const query = createSimpleQuery([[{ id: '', version: 0 }], ''], 1);
-    const result = await query();
+    const simpleQuery = createSimpleQuery([[{ id: '', version: 0 }], ''], 1);
+    const result = await simpleQuery();
     expect(result).toBe(1);
-    expect(cache.size).toBe(1);
-    await query();
-    expect(cache.size).toBe(1);
+    expect(query.size).toBe(1);
+    await simpleQuery();
+    expect(query.size).toBe(1);
   });
 });
 
@@ -291,15 +291,15 @@ describe('Query Property Tests', () => {
         fc.anything(),
         async (queryKey: QueryKey, mockData: unknown) => {
           await lock.acquire('property-test', async () => {
-            cache.clear({ resetOptions: true });
-            expect(cache.size).toBe(0);
-            const query = () =>
-              cache.query({
+            query.clear({ resetOptions: true });
+            expect(query.size).toBe(0);
+            const randomQuery = () =>
+              query.cache({
                 queryKey: [queryKey],
                 queryFn: async () => mockData,
               });
 
-            const result = await query();
+            const result = await randomQuery();
             expect(result).toEqual(mockData);
           });
         }
@@ -315,14 +315,14 @@ describe('Query Property Tests', () => {
         fc.anything(),
         async (queryKey: string, mockData: unknown) => {
           await lock.acquire('property-test', async () => {
-            cache.clear({ resetOptions: true });
-            expect(cache.size).toBe(0);
-            const query = () =>
-              cache.query({
+            query.clear({ resetOptions: true });
+            expect(query.size).toBe(0);
+            const randomQuery = () =>
+              query.cache({
                 queryKey: [queryKey],
                 queryFn: async () => mockData,
               });
-            const result = await query();
+            const result = await randomQuery();
             expect(result).toEqual(mockData);
           });
         }

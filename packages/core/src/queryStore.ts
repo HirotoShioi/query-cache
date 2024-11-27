@@ -18,13 +18,14 @@ type QueryStoreOptions = Partial<{
  * QueryStore is a singleton class that manages the queries in the cache.
  */
 class QueryStore {
-  private static instance: QueryStore;
   #cache: HashKeyMap<Query>;
   #maxSize = Infinity;
   #staleTime = Infinity;
 
-  private constructor() {
+  constructor(maxSize = Infinity, staleTime = Infinity) {
     this.#cache = new HashKeyMap();
+    this.#maxSize = maxSize;
+    this.#staleTime = staleTime;
   }
 
   get size(): number {
@@ -124,13 +125,6 @@ class QueryStore {
     for (const query of this.#cache.values()) {
       await query.invalidate(refetch);
     }
-  }
-
-  static getInstance(): QueryStore {
-    if (!QueryStore.instance) {
-      QueryStore.instance = new QueryStore();
-    }
-    return QueryStore.instance;
   }
 
   clear({ resetOptions = false }: ClearOptions = {}): void {
