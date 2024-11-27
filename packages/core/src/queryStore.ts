@@ -24,8 +24,7 @@ class QueryStore {
 
   constructor(maxSize = Infinity, staleTime = Infinity) {
     this.#cache = new HashKeyMap();
-    this.#maxSize = maxSize;
-    this.#staleTime = staleTime;
+    this.setOptions({ maxSize, staleTime });
   }
 
   get size(): number {

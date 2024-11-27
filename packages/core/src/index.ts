@@ -58,6 +58,6 @@ class QueryCacheClient {
   }
 }
 
-export const query = new QueryCacheClient();
+export { QueryCacheClient };
 
 export type { CreateQueryParams };
