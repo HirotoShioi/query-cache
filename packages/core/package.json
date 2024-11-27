@@ -1,0 +1,45 @@
+{
+  "name": "@hirotoshioi/query-cache-client",
+  "version": "0.0.1",
+  "description": "Simple query cache",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "license": "MIT",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/hirotoshioi/query-cache-client.git"
+  },
+  "scripts": {
+    "build": "vite build",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "dev": "vite build --watch",
+    "lint": "biome check src",
+    "format": "biome format src --write",
+    "test:browser": "TEST_ENV=browser vitest run --browser.name=chromium --browser.provider=playwright",
+    "test:node": "vitest run",
+    "test": "npm run test:browser && npm run test:node"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "@types/async-lock": "^1.4.2",
+    "async-lock": "^1.4.1",
+    "fast-check": "^3.23.0"
+  }
+}
