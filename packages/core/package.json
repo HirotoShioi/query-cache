@@ -8,10 +8,7 @@
   "types": "./dist/index.d.ts",
   "sideEffects": false,
   "license": "MIT",
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "repository": {
     "type": "github",
     "url": "https://github.com/hirotoshioi/query-cache-client.git"
@@ -38,8 +35,6 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@types/async-lock": "^1.4.2",
-    "async-lock": "^1.4.1",
     "fast-check": "^3.23.0"
   }
 }
