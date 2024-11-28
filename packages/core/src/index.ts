@@ -45,10 +45,6 @@ class QueryCache {
     }
   }
 
-  clear(options: Partial<{ resetOptions: boolean }> = {}) {
-    this.#queryStore.clear(options);
-  }
-
   setOptions(options: QueryStoreOptions) {
     this.#queryStore.setOptions(options);
   }

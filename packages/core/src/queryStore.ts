@@ -1,12 +1,7 @@
 import { HashKeyMap } from './hashKeyMap';
 import { Query } from './query';
 import { QueryKeyHash } from './queryKeyHash';
-import {
-  ClearOptions,
-  CreateQueryParams,
-  NonEmptyArray,
-  QueryKey,
-} from './types';
+import { CreateQueryParams, NonEmptyArray, QueryKey } from './types';
 import { matchQuery } from './util';
 
 type QueryStoreOptions = Partial<{
@@ -129,25 +124,6 @@ class QueryStore {
   async isStale(queryKeys: NonEmptyArray<QueryKey>): Promise<boolean> {
     const queries = await this.findQueries({ queryKeys, exactMatchOnly: true });
     return queries.some((query) => query.isStale());
-  }
-
-  clear({ resetOptions = false }: ClearOptions = {}): void {
-    if (this.#cache.size > 0) {
-      // キャッシュ内の各クエリのクリーンアップを実行
-      for (const query of this.#cache.values()) {
-        query.destroy();
-      }
-      // キャッシュをクリア
-      this.#cache.clear();
-      // インスタンスへの参照を削除
-      this.#cache = new HashKeyMap();
-    }
-    if (resetOptions) {
-      this.setOptions({
-        maxSize: Infinity,
-        staleTime: Infinity,
-      });
-    }
   }
 }
 
