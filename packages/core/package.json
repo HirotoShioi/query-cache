@@ -1,5 +1,5 @@
 {
-  "name": "@hirotoshioi/query-cache-client",
+  "name": "query-cache-client",
   "version": "0.0.1",
   "description": "Simple query cache",
   "main": "./dist/index.js",

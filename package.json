@@ -1,5 +1,5 @@
 {
-  "name": "@hirotoshioi/query-cache-client-monorepo",
+  "name": "query-cache-client-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",
