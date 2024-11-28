@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { QueryCacheClient } from '@hirotoshioi/query-cache-client';
+import { QueryCacheClient } from 'query-cache-client';
 import { Button } from '@/components/ui/button';
 import {
   Card,
