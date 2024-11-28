@@ -53,6 +53,10 @@ class QueryCacheClient {
     this.#queryStore.setOptions(options);
   }
 
+  async isStale(queryKeys: NonEmptyArray<QueryKey>): Promise<boolean> {
+    return this.#queryStore.isStale(queryKeys);
+  }
+
   get size(): number {
     return this.#queryStore.size;
   }

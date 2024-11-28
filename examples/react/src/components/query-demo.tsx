@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { cache } from '@hirotoshioi/query-cache-client';
+import { QueryCacheClient } from '@hirotoshioi/query-cache-client';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,6 +20,7 @@ const fetchData = async (key: string, delay: number) => {
   return `Data for ${key}: ${Math.random().toString(36).substring(7)}`;
 };
 
+const query = new QueryCacheClient();
 export function QueryDemo() {
   const [queryKey, setQueryKey] = useState('default');
   const [staleTime, setStaleTime] = useState(5000);
@@ -27,6 +28,7 @@ export function QueryDemo() {
   const [loading, setLoading] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [isFirstFetch, setIsFirstFetch] = useState(true);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -42,7 +44,8 @@ export function QueryDemo() {
   const handleQuery = async () => {
     setLoading(true);
     const startTime = Date.now();
-    const data = await cache.query<string>({
+    const isStale = await query.isStale([queryKey]);
+    const data = await query.cache<string>({
       queryKey: [queryKey],
       queryFn: () => fetchData(queryKey, 1000),
       staleTime,
@@ -50,11 +53,14 @@ export function QueryDemo() {
     const endTime = Date.now();
     setResult(`${data}\nFetch time: ${endTime - startTime}ms`);
     setLoading(false);
-    setLastFetchTime(Date.now());
+    if (isStale || isFirstFetch) {
+      setLastFetchTime(Date.now());
+      setIsFirstFetch(false);
+    }
   };
 
   const handleInvalidate = async () => {
-    await cache.invalidate({ queryKey: [queryKey] });
+    await query.invalidateCache({ queryKey: [queryKey] });
     setResult('Cache invalidated');
     setLastFetchTime(null);
   };
@@ -95,7 +101,7 @@ export function QueryDemo() {
         </div>
         {lastFetchTime && (
           <div className="space-y-2">
-            <Label>Time since last fetch</Label>
+            <Label>Cache Age</Label>
             <Progress value={(elapsedTime / staleTime) * 100} />
             <p className="text-sm text-gray-300">
               {elapsedTime.toFixed(0)}ms / {staleTime}ms

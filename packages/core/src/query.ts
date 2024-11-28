@@ -62,6 +62,10 @@ class Query<T = unknown> {
     this.#timestamp = Date.now();
   }
 
+  isStale(): boolean {
+    return Date.now() - this.#timestamp >= this.#staleTime;
+  }
+
   get timestamp(): number {
     return this.#timestamp;
   }
