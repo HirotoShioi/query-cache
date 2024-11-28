@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { QueryCacheClient } from '..';
-import type { QueryKey, NonEmptyArray } from '../types';
+import type { QueryKey, NonEmptyArray } from '../src/types';
 import * as fc from 'fast-check';
 
 export const sleep = (ms: number) =>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { partialMatchKey } from '../util';
+import { partialMatchKey } from '../src/util';
 
 describe('partialMatchKey', () => {
   // プリミティブ値のテスト
