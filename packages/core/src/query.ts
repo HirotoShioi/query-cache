@@ -22,6 +22,8 @@ class Query<T = unknown> {
   #staleTime: number;
   #queryKeyHash: QueryKeyHash;
   #queryKey: NonEmptyArray<QueryKey>;
+  #abortController: AbortController | null = null;
+
   static async create<T>(params: QueryParams<T>): Promise<Query<T>> {
     const queryKeyHash = await QueryKeyHash.create(params.queryKey);
     return new Query({
@@ -39,13 +41,23 @@ class Query<T = unknown> {
   }
 
   private async dispatch(): Promise<T> {
+    // キャンセル用のAbortControllerを設定
+    this.#abortController = new AbortController();
+    const signal = this.#abortController.signal;
+
     try {
-      const data = await this.#queryFn();
+      const data = await this.#queryFn({ signal });
       this.setData(data);
       return data;
     } catch (error) {
-      this.clear();
+      if (signal.aborted) {
+        console.warn('Query was cancelled');
+      } else {
+        this.clear();
+      }
       throw error;
+    } finally {
+      this.#abortController = null; // 処理完了後にリセット
     }
   }
 
@@ -86,12 +98,20 @@ class Query<T = unknown> {
     this.#data = undefined;
     this.#isSet = false;
     this.#timestamp = 0;
+    this.cancel(); // 現在の処理をキャンセル
   }
 
   async invalidate(refetch = true): Promise<void> {
     this.clear();
     if (refetch) {
       await this.dispatch();
+    }
+  }
+
+  cancel(): void {
+    if (this.#abortController) {
+      this.#abortController.abort();
+      this.#abortController = null;
     }
   }
 }
