@@ -1,7 +1,7 @@
 import QueryStore, { QueryStoreOptions } from './queryStore';
 import type { CreateQueryParams, NonEmptyArray, QueryKey } from './types';
 
-class QueryCacheClient {
+class QueryCache {
   #queryStore: QueryStore;
 
   constructor(args: { maxSize?: number; staleTime?: number } = {}) {
@@ -62,6 +62,6 @@ class QueryCacheClient {
   }
 }
 
-export { QueryCacheClient };
+export { QueryCache };
 
 export type { CreateQueryParams };

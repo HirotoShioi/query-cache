@@ -1,5 +1,5 @@
 {
-  "name": "query-cache-client",
+  "name": "query-cache",
   "version": "0.0.1",
   "description": "Simple query cache",
   "main": "./dist/index.js",
@@ -12,7 +12,7 @@
   "files": ["dist", "src"],
   "repository": {
     "type": "github",
-    "url": "https://github.com/hirotoshioi/query-cache-client.git"
+    "url": "https://github.com/hirotoshioi/query-cache.git"
   },
   "scripts": {
     "build": "vite build",

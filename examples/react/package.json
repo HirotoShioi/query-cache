@@ -1,5 +1,5 @@
 {
-  "name": "query-cache-client-examples-react",
+  "name": "query-cache-examples-react",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "query-cache-client": "workspace:*",
+    "query-cache": "workspace:*",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-progress": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",

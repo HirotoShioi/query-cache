@@ -1,5 +1,5 @@
 {
-  "name": "query-cache-client-monorepo",
+  "name": "query-cache-monorepo",
   "private": true,
   "scripts": {
     "build": "turbo run build",

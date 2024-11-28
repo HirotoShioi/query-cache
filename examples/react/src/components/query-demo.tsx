@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { QueryCacheClient } from 'query-cache-client';
+import { QueryCache } from 'query-cache';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,7 +20,7 @@ const fetchData = async (key: string, delay: number) => {
   return `Data for ${key}: ${Math.random().toString(36).substring(7)}`;
 };
 
-const query = new QueryCacheClient();
+const query = new QueryCache();
 export function QueryDemo() {
   const [queryKey, setQueryKey] = useState('default');
   const [staleTime, setStaleTime] = useState(5000);

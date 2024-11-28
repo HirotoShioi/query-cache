@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { QueryCacheClient } from '..';
+import { QueryCache } from '..';
 import type { QueryKey, NonEmptyArray } from '../src/types';
 import * as fc from 'fast-check';
 
@@ -9,16 +9,16 @@ export const sleep = (ms: number) =>
 type CreateCounterQueryParams = {
   queryKey: NonEmptyArray<QueryKey>;
   staleTime?: number;
-  queryCacheClient?: QueryCacheClient;
+  queryCache?: QueryCache;
 };
 // Test helper function
 const createCounterQuery = ({
   queryKey,
   staleTime,
-  queryCacheClient,
+  queryCache,
 }: CreateCounterQueryParams) => {
   let count = 0;
-  const query = queryCacheClient ?? new QueryCacheClient();
+  const query = queryCache ?? new QueryCache();
   const queryFn = () =>
     query.cache<number>({
       queryKey,
@@ -37,14 +37,14 @@ const createCounterQuery = ({
 type CreateSimpleQueryParams<T> = {
   queryKey: NonEmptyArray<QueryKey>;
   returnValue: T;
-  queryCacheClient?: QueryCacheClient;
+  queryCache?: QueryCache;
 };
 const createSimpleQuery = <T>({
   queryKey,
   returnValue,
-  queryCacheClient,
+  queryCache,
 }: CreateSimpleQueryParams<T>) => {
-  const query = queryCacheClient ?? new QueryCacheClient();
+  const query = queryCache ?? new QueryCache();
   const queryFn = () =>
     query.cache<T>({
       queryKey,
@@ -140,14 +140,14 @@ describe.sequential('Query - Browser Environment', () => {
   });
 
   it('should invalidate cache with multiple keys', async () => {
-    const query = new QueryCacheClient();
+    const query = new QueryCache();
     const { queryFn: query1Fn } = createCounterQuery({
       queryKey: ['invalidate-multiple-test', 'key1'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     const { queryFn: query2Fn } = createCounterQuery({
       queryKey: ['invalidate-multiple-test', 'key-two'],
-      queryCacheClient: query,
+      queryCache: query,
     });
 
     await query1Fn();
@@ -180,14 +180,14 @@ describe.sequential('Query - Browser Environment', () => {
   });
 
   it('should invalidate all queries', async () => {
-    const query = new QueryCacheClient();
+    const query = new QueryCache();
     const { queryFn: q1Fn } = createCounterQuery({
       queryKey: [1],
-      queryCacheClient: query,
+      queryCache: query,
     });
     const { queryFn: q2Fn } = createCounterQuery({
       queryKey: [2],
-      queryCacheClient: query,
+      queryCache: query,
     });
 
     await q1Fn();
@@ -200,18 +200,18 @@ describe.sequential('Query - Browser Environment', () => {
   });
 
   it('should invalidate only exact matching queries', async () => {
-    const query = new QueryCacheClient();
+    const query = new QueryCache();
     const { queryFn: query1Fn } = createCounterQuery({
       queryKey: ['users', 'list'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     const { queryFn: query2Fn } = createCounterQuery({
       queryKey: ['users', 'list', 'active'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     const { queryFn: query3Fn } = createCounterQuery({
       queryKey: ['users', 'details'],
-      queryCacheClient: query,
+      queryCache: query,
     });
 
     await query1Fn();
@@ -235,14 +235,14 @@ describe.sequential('Query - Browser Environment', () => {
     expect(await query3Fn()).toBe(1);
   });
   it('should invalidate only exact matching queries', async () => {
-    const query = new QueryCacheClient();
+    const query = new QueryCache();
     const { queryFn: query1Fn } = createCounterQuery({
       queryKey: ['users', 'list'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     const { queryFn: query2Fn } = createCounterQuery({
       queryKey: ['users', 'list', 'active'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     await query1Fn();
     await query2Fn();
@@ -272,53 +272,53 @@ describe.sequential('Query - Browser Environment', () => {
     expect(await queryFn()).toBe(2);
   });
   it('should delete least recently used queries when cache is full', async () => {
-    const query = new QueryCacheClient({
+    const query = new QueryCache({
       maxSize: 2,
     });
     const { queryFn: query1Fn } = createCounterQuery({
       queryKey: ['lru-test'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     await query1Fn();
     const { queryFn: query2Fn } = createCounterQuery({
       queryKey: ['lru-test', 'key2'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     await query2Fn();
     const { queryFn: query3Fn } = createCounterQuery({
       queryKey: ['lru-test', 'key3'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     await query3Fn();
     expect(query.size).toBe(2);
   });
   it('should not cache when cache is set to 0', async () => {
-    const query = new QueryCacheClient({
+    const query = new QueryCache({
       maxSize: 0,
     });
     const { queryFn: counterQueryFn } = createCounterQuery({
       queryKey: ['no-cache-test'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     await counterQueryFn();
     expect(query.size).toBe(0);
   });
   it('should ignore when the options are invalid', async () => {
-    const query = new QueryCacheClient({
+    const query = new QueryCache({
       maxSize: -1,
       staleTime: -1,
     });
     expect(query.size).toBe(0);
     const { queryFn: counterQueryFn } = createCounterQuery({
       queryKey: ['invalid-options-test'],
-      queryCacheClient: query,
+      queryCache: query,
     });
     await counterQueryFn();
     expect(query.size).toBe(1);
   });
   it('cache even if the queryFn returns falsy values', async () => {
     let falsyCount = 0;
-    const query = new QueryCacheClient();
+    const query = new QueryCache();
     const falsyQuery = () =>
       query.cache({
         queryKey: ['falsy-test'],
@@ -378,7 +378,7 @@ describe('Query Property Tests', () => {
         ),
         fc.anything(),
         async (queryKey: QueryKey, mockData: unknown) => {
-          const query = new QueryCacheClient();
+          const query = new QueryCache();
           const randomQuery = () =>
             query.cache({
               queryKey: [queryKey],
@@ -399,7 +399,7 @@ describe('Query Property Tests', () => {
         fc.string(),
         fc.anything(),
         async (queryKey: string, mockData: unknown) => {
-          const query = new QueryCacheClient();
+          const query = new QueryCache();
           expect(query.size).toBe(0);
           const randomQuery = () =>
             query.cache({
