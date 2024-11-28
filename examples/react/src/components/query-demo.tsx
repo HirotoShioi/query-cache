@@ -69,7 +69,7 @@ export function QueryDemo() {
     <Card className="w-full max-w-md mx-auto bg-gray-700/90 backdrop-blur-sm text-white">
       <CardHeader>
         <CardTitle>Query Demo</CardTitle>
-        <CardDescription>Test the query-cache-client library</CardDescription>
+        <CardDescription>Test the query-cache library</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
