@@ -45,7 +45,7 @@ export function QueryDemo() {
     setLoading(true);
     const startTime = Date.now();
     const isStale = await query.isStale([queryKey]);
-    const data = await query.cache<string>({
+    const data = await query.cache({
       queryKey: [queryKey],
       queryFn: () => fetchData(queryKey, 1000),
       staleTime,

@@ -12,7 +12,8 @@
   "files": ["dist", "src"],
   "repository": {
     "type": "github",
-    "url": "https://github.com/hirotoshioi/query-cache.git"
+    "url": "https://github.com/hirotoshioi/query-cache.git",
+    "directory": "packages/core"
   },
   "scripts": {
     "build": "vite build",

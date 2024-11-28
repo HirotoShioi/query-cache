@@ -8,7 +8,7 @@ class QueryCache {
     this.#queryStore = new QueryStore(args.maxSize, args.staleTime);
   }
 
-  async cache<T = unknown>(params: CreateQueryParams<T>): Promise<T> {
+  async cache<T>(params: CreateQueryParams<T>): Promise<T> {
     if (params.queryKey.length <= 0) {
       throw new Error('Keys must be provided');
     }

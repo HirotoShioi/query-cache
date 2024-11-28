@@ -1,6 +1,10 @@
 {
   "name": "query-cache-monorepo",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hirotoshioi/query-cache.git"
+  },
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -10,14 +14,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
-    "turbo": "^2.3.2",
+    "turbo": "^2.3.3",
     "typescript": "^5.7.2",
-    "@types/node": "^22.10.0",
+    "@types/node": "^22.10.1",
     "vitest": "^2.1.6",
     "@vitest/browser": "^2.1.6",
     "@playwright/test": "^1.49.0",
-    "vite": "^6.0.0",
+    "vite": "^6.0.1",
     "vite-plugin-dts": "^4.3.0"
   },
-  "packageManager": "pnpm@9.1.0"
+  "packageManager": "pnpm@9.13.0"
 }

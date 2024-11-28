@@ -20,7 +20,7 @@ const createCounterQuery = ({
   let count = 0;
   const query = queryCache ?? new QueryCache();
   const queryFn = () =>
-    query.cache<number>({
+    query.cache({
       queryKey,
       queryFn: async () => {
         count++;
