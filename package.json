@@ -1,5 +1,5 @@
 {
-  "name": "query-cache-monorepo",
+  "name": "@hirotoshioi/query-cache-monorepo",
   "private": true,
   "repository": {
     "type": "git",
