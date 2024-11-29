@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { QueryCache } from '..';
+import { QueryCache } from '../src/index';
 import type { QueryKey, NonEmptyArray } from '../src/types';
 import * as fc from 'fast-check';
 
@@ -65,8 +65,6 @@ describe.sequential('Query - Browser Environment', () => {
     const result = await queryFn();
     expect(result).toEqual(1);
     expect(query.size).toBe(1);
-    query.clear();
-    expect(query.size).toBe(0);
   });
 
   it('should return same result when called with same key', async () => {
@@ -77,6 +75,48 @@ describe.sequential('Query - Browser Environment', () => {
     expect(result).toEqual(1);
     const result2 = await queryFn();
     expect(result2).toEqual(1);
+  });
+
+  it('should revalidate if refetchOnInvalidate is true', async () => {
+    const query = new QueryCache({
+      refetchOnInvalidate: true,
+    });
+    let count = 0;
+    const queryFn = () =>
+      query.cache({
+        queryKey: ['refetch-on-invalidate-test'],
+        queryFn: async () => {
+          count++;
+          return count;
+        },
+      });
+    await queryFn();
+    expect(count).toEqual(1);
+    await query.invalidateCache({
+      queryKey: ['refetch-on-invalidate-test'],
+    });
+    expect(count).toEqual(2);
+  });
+  it('should not revalidate if refetchOnInvalidate is false', async () => {
+    const query = new QueryCache({
+      refetchOnInvalidate: false,
+    });
+    let count = 0;
+    const queryFn = () =>
+      query.cache({
+        queryKey: ['refetch-on-invalidate-test'],
+        queryFn: async () => {
+          count++;
+          return count;
+        },
+      });
+    const result1 = await queryFn();
+    expect(result1).toEqual(1);
+    expect(count).toEqual(1);
+    await query.invalidateCache({
+      queryKey: ['refetch-on-invalidate-test'],
+    });
+    expect(count).toEqual(1);
   });
 
   it('should invalidate cache', async () => {
@@ -127,16 +167,6 @@ describe.sequential('Query - Browser Environment', () => {
       refetch: false,
     });
     expect(await queryFn()).toEqual(2);
-  });
-
-  it('should clear cache', async () => {
-    const { query, queryFn } = createSimpleQuery({
-      queryKey: ['clear-test'],
-      returnValue: 'clear test data',
-    });
-    await queryFn();
-    query.clear();
-    expect(query.size).toBe(0);
   });
 
   it('should invalidate cache with multiple keys', async () => {

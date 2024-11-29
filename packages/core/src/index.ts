@@ -4,8 +4,18 @@ import type { CreateQueryParams, NonEmptyArray, QueryKey } from './types';
 class QueryCache {
   #queryStore: QueryStore;
 
-  constructor(args: { maxSize?: number; staleTime?: number } = {}) {
-    this.#queryStore = new QueryStore(args.maxSize, args.staleTime);
+  constructor(
+    args: {
+      maxSize?: number;
+      staleTime?: number;
+      refetchOnInvalidate?: boolean;
+    } = {}
+  ) {
+    this.#queryStore = new QueryStore(
+      args.maxSize,
+      args.staleTime,
+      args.refetchOnInvalidate
+    );
   }
 
   async cache<T>(params: CreateQueryParams<T>): Promise<T> {
@@ -25,24 +35,22 @@ class QueryCache {
 
   async invalidateCache({
     queryKey,
-    refetch = true,
-    exact = false,
+    refetch,
+    exact,
   }: Partial<{
     queryKey: NonEmptyArray<QueryKey>;
     refetch: boolean;
     exact: boolean;
   }> = {}) {
-    if (!queryKey) {
-      await this.#queryStore.invalidateAll(refetch);
-      return;
-    }
-    const queries = await this.#queryStore.findQueries({
-      queryKeys: queryKey,
-      exactMatchOnly: exact,
-    });
-    for (const query of queries) {
-      query.invalidate(refetch);
-    }
+    await this.#queryStore.invalidateQueries(queryKey, refetch, exact);
+  }
+
+  get options(): QueryStoreOptions {
+    return {
+      maxSize: this.#queryStore.maxSize,
+      staleTime: this.#queryStore.staleTime,
+      refetchOnInvalidate: this.#queryStore.refetchOnInvalidate,
+    };
   }
 
   setOptions(options: QueryStoreOptions) {

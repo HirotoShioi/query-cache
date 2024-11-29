@@ -23,7 +23,8 @@
     "format": "biome format src --write",
     "test:browser": "TEST_ENV=browser vitest run --browser.name=chromium --browser.provider=playwright",
     "test:node": "vitest run",
-    "test": "npm run test:browser && npm run test:node"
+    "test": "npx run test:browser && npx run test:node",
+    "test:watch": "vitest --watch --reporter verbose"
   },
   "publishConfig": {
     "access": "public"

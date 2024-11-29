@@ -7,6 +7,7 @@ import { matchQuery } from './util';
 type QueryStoreOptions = Partial<{
   maxSize: number;
   staleTime: number;
+  refetchOnInvalidate: boolean;
 }>;
 
 /**
@@ -16,10 +17,15 @@ class QueryStore {
   #cache: HashKeyMap<Query>;
   #maxSize = Infinity;
   #staleTime = Infinity;
+  #refetchOnInvalidate = true;
 
-  constructor(maxSize = Infinity, staleTime = Infinity) {
+  constructor(
+    maxSize = Infinity,
+    staleTime = Infinity,
+    refetchOnInvalidate = true
+  ) {
     this.#cache = new HashKeyMap();
-    this.setOptions({ maxSize, staleTime });
+    this.setOptions({ maxSize, staleTime, refetchOnInvalidate });
   }
 
   get size(): number {
@@ -28,6 +34,10 @@ class QueryStore {
 
   get maxSize(): number {
     return this.#maxSize;
+  }
+
+  get refetchOnInvalidate(): boolean {
+    return this.#refetchOnInvalidate;
   }
 
   get staleTime(): number {
@@ -44,6 +54,7 @@ class QueryStore {
         options.staleTime !== undefined && options.staleTime >= 0
           ? options.staleTime
           : undefined,
+      refetchOnInvalidate: options.refetchOnInvalidate,
     };
 
     if (sanitizedOptions.maxSize !== undefined) {
@@ -52,6 +63,10 @@ class QueryStore {
 
     if (sanitizedOptions.staleTime !== undefined) {
       this.#staleTime = sanitizedOptions.staleTime;
+    }
+
+    if (sanitizedOptions.refetchOnInvalidate !== undefined) {
+      this.#refetchOnInvalidate = sanitizedOptions.refetchOnInvalidate;
     }
   }
 
@@ -110,13 +125,22 @@ class QueryStore {
     return (await query.getData()) as T;
   }
 
-  async invalidate(queryId: QueryKeyHash, refetch = true): Promise<void> {
-    const query = this.#cache.get(queryId);
-    await query?.invalidate(refetch);
-  }
-
-  async invalidateAll(refetch = true): Promise<void> {
-    for (const query of this.#cache.values()) {
+  async invalidateQueries(
+    queryKeys?: NonEmptyArray<QueryKey>,
+    refetch = this.#refetchOnInvalidate,
+    exact = false
+  ): Promise<void> {
+    if (!queryKeys) {
+      for (const query of this.#cache.values()) {
+        await query.invalidate(refetch);
+      }
+      return;
+    }
+    const queries = await this.findQueries({
+      queryKeys,
+      exactMatchOnly: exact,
+    });
+    for (const query of queries) {
       await query.invalidate(refetch);
     }
   }

@@ -11,7 +11,6 @@ export default defineConfig({
       headless: true,
     },
     include: ['__test__/*.test.ts'],
-    // console.logを表示するための設定を追加
     silent: false,
     logHeapUsage: true,
   },
