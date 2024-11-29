@@ -9,7 +9,7 @@
   "private": false,
   "sideEffects": false,
   "license": "MIT",
-  "files": ["dist", "src"],
+  "files": ["dist", "src", "package.json", "README.md"],
   "repository": {
     "type": "github",
     "url": "https://github.com/hirotoshioi/query-cache.git",
