@@ -145,6 +145,10 @@ class QueryStore {
     }
   }
 
+  clear() {
+    this.#cache.clear();
+  }
+
   async isStale(queryKeys: NonEmptyArray<QueryKey>): Promise<boolean> {
     const queries = await this.findQueries({ queryKeys, exactMatchOnly: true });
     return queries.some((query) => query.isStale());

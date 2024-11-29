@@ -388,6 +388,18 @@ describe.sequential('Query - Browser Environment', () => {
     await simpleQueryFn();
     expect(query.size).toBe(1);
   });
+  it('should clear cache', async () => {
+    const query = new QueryCache();
+    const { queryFn } = createCounterQuery({
+      queryKey: ['clear-test'],
+      queryCache: query,
+    });
+    await queryFn();
+    expect(query.size).toBe(1);
+    query.clear();
+    expect(query.size).toBe(0);
+    expect(await queryFn()).toBe(2);
+  });
 });
 
 describe('Query Property Tests', () => {

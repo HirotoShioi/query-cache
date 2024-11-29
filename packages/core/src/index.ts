@@ -64,6 +64,10 @@ class QueryCache {
   get size(): number {
     return this.#queryStore.size;
   }
+
+  clear() {
+    this.#queryStore.clear();
+  }
 }
 
 export { QueryCache };
